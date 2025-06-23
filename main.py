@@ -84,7 +84,7 @@ class CameraPage(QWidget):
         frame = histogram_esitleme_uygula(frame)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        if self.frame_count % 50 == 0:
+        if self.frame_count % 100 == 0:
             boxes = detect_faces(frame_rgb)
             self.tracked_faces = []
             for (x1, y1, x2, y2) in boxes:
