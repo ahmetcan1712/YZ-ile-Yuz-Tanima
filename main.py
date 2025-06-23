@@ -15,6 +15,7 @@ from user_management import KisiYonetimPage
 from log_utils import log_ekle, veritabani_olustur
 from log_page import LogPage
 
+
 class CameraPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -28,7 +29,7 @@ class CameraPage(QWidget):
         self.tracked_faces = []
         self.frame_count = 0
         self.index = faiss.IndexFlatL2(128)
-        self.isimler = []  # FAISS için isim listesi
+        self.isimler = []
 
     def setup_ui(self):
         layout = QVBoxLayout()
@@ -83,7 +84,7 @@ class CameraPage(QWidget):
         frame = histogram_esitleme_uygula(frame)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        if self.frame_count % 100 == 0:
+        if self.frame_count % 50 == 0:
             boxes = detect_faces(frame_rgb)
             self.tracked_faces = []
             for (x1, y1, x2, y2) in boxes:
@@ -95,11 +96,11 @@ class CameraPage(QWidget):
                 vektor = encodings[0].astype('float32').reshape(1, -1)
                 mesafeler, indeksler = self.index.search(vektor, 1)
 
-                if len(self.isimler) == 0:
+                if len(self.isimler) == 0 or mesafeler[0][0] >= esik:
                     isim = "Taninmadi"
                 else:
                     isim = self.isimler[indeksler[0][0]]
-                log_ekle(isim, isim, esik, float(mesafeler[0][0])) if mesafeler[0][0] < esik else "Taninmadi"
+                    log_ekle(isim, isim, esik, float(mesafeler[0][0]))
 
                 tracker = create_tracker(frame, bbox)
                 self.tracked_faces.append(TrackedFace(tracker, isim))
@@ -133,6 +134,7 @@ class CameraPage(QWidget):
     def hideEvent(self, event):
         self.kamera_durdur()
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -160,6 +162,7 @@ class MainWindow(QMainWindow):
 
     def show_page(self, index):
         self.stacked_widget.setCurrentIndex(index)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
